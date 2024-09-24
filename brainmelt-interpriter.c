@@ -1,7 +1,7 @@
 /*
 
 brainmelt interpriter
-Version 1.0.0 Pre-Alpha
+Version 1.0.0
 
 命令一覧：
 ```
@@ -35,25 +35,42 @@ int memory[MEMORY_SIZE] = {0};
 int *ptr = memory; // 現在のメモリポインタ
 FILE *file;
 
-void help() {
-    printf("brainmelt HELP\nusage:\n    bi [input.bms]\n\nbrainmelt interpriter version 1.0.0 Pre-Alpha\n");
+void help() 
+{
+
+    printf("brainmelt HELP\n");
+    printf("usage:    bi [input.bms]\n");
+    printf("\nbrainmelt interpriter version 1.0.0\n");
+
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
+int main(int argc, char* argv[])
+{
+
+    if (argc < 2)
+    {
+    
         help();
         return 0;
+    
     }
 
     file = fopen(argv[1], "r");
-    if (!file) {
+    if (!file)
+    {
+    
         printf("failed open file.\n");
         return 1;
+    
     }
 
     int chr;
-    while ((chr = fgetc(file)) != EOF) {
-        switch (chr) {
+    while ((chr = fgetc(file)) != EOF)
+    {
+    
+        switch (chr)
+        {
+        
             case '@':
                 putchar(*ptr);
                 break;
@@ -87,26 +104,38 @@ int main(int argc, char* argv[]) {
                 // 無条件ジャンプ処理（必要に応じて実装）
                 break;
             case '[':
-                if (*ptr == 0) {
+                if (*ptr == 0)
+                {
+                
                     // 対応する']'までスキップ
                     int loop = 1;
-                    while (loop > 0) {
+                    while (loop > 0)
+                    {
+                    
                         chr = fgetc(file);
                         if (chr == '[') loop++;
                         else if (chr == ']') loop--;
+                    
                     }
+                
                 }
                 break;
             case ']':
-                if (*ptr != 0) {
+                if (*ptr != 0)
+                {
+                
                     // 対応する'['まで戻る
                     int loop = 1;
-                    while (loop > 0) {
+                    while (loop > 0)
+                    {
+                    
                         fseek(file, -2, SEEK_CUR); // 1文字戻る
                         chr = fgetc(file);
                         if (chr == ']') loop++;
                         else if (chr == '[') loop--;
+                    
                     }
+                
                 }
                 break;
             case '^':
@@ -121,9 +150,12 @@ int main(int argc, char* argv[]) {
             case '=':
                 fclose(file);
                 return 0;
+        
         }
+
     }
 
     fclose(file);
     return 0;
+
 }
