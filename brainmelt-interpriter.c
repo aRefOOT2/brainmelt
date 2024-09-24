@@ -29,141 +29,101 @@ $:現在のアドレスに標準入力を1Byteずつ入力する
 #include <stdlib.h>
 #include <string.h>
 
-int chr;
+#define MEMORY_SIZE 30000
 
-int *add = 0;
-
-int list[] = {};
-
+int memory[MEMORY_SIZE] = {0};
+int *ptr = memory; // 現在のメモリポインタ
 FILE *file;
 
-void help()
-{
-    
-    printf("brainmelt HELP\n");
-    printf("usage:\n");
-    printf("    bi [input.bms]\n");
-    printf("\nbrainmelt interpriter version 1.0.0 Pre-Alpha\n");
-
+void help() {
+    printf("brainmelt HELP\nusage:\n    bi [input.bms]\n\nbrainmelt interpriter version 1.0.0 Pre-Alpha\n");
 }
 
-int main(int argc,char* argv[])
-{
-    
-    printf("bi 1.0.0PA\nargc: %d\nargv[1]: %s\n",argc, argv[1]);
-
-    if (argc == 1)
-    {
-
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
         help();
         return 0;
-
     }
 
     file = fopen(argv[1], "r");
-
-    if (file == NULL)
-    {
-        
+    if (!file) {
         printf("failed open file.\n");
         return 1;
-
     }
 
-    while(1)
-    {
-        printf("start\n");
-        
-        if (strcmp(fgetc(file), "@") == 0)
-        {
-
-            printf("at\n");
-            putchar(*add);
-        
-        } else if (strcmp(fgetc(file), "$") == 0)
-        {
-
-            printf("$\n");
-            *add=getchar();
-
-        } else if (strcmp(fgetc(file), "+") == 0)
-        {
-
-            (*add)++;
-
-        } else if (strcmp(fgetc(file), "-") == 0)
-        {
-
-            (*add)--;
-
-        } else if (strcmp(fgetc(file), "*") == 0)
-        {
-
-            *add = (*add) * 2;
-
-        } else if (strcmp(fgetc(file), "/") == 0)
-        {
-
-            *add = (*add) / 2;
-
-        } else if (strcmp(fgetc(file), "?") == 0)
-        {
-
-            *add = *add % *(add - 1);
-
-        } else if (strcmp(fgetc(file), ">") == 0)
-        {
-
-            add++;
-
-        } else if (strcmp(fgetc(file), "<") == 0)
-        {
-
-            add--;
-
-        } else if (chr == '#')
-        {
-
-            printf("#\n");
-            add = *add;
-
-        } else if (chr == '[')
-        {
-
-            printf("[\n");
-
-        } else if (chr == ']')
-        {
-
-            printf("]\n");
-
-        } else if (chr == '^')
-        {
-
-            printf("^\n");
-
-        } else if (chr == '%')
-        {
-
-            printf("%%\n");
-
-        } else if (chr == '!')
-        {
-
-            printf("!\n");
-
-        } else if (chr == '=')
-        {
-
-            printf("end\n");
-            return 0;
-
+    int chr;
+    while ((chr = fgetc(file)) != EOF) {
+        switch (chr) {
+            case '@':
+                putchar(*ptr);
+                break;
+            case '$':
+                *ptr = getchar();
+                break;
+            case '+':
+                (*ptr)++;
+                break;
+            case '-':
+                (*ptr)--;
+                break;
+            case '*':
+                *ptr <<= 1; // 左シフト
+                break;
+            case '/':
+                *ptr >>= 1; // 右シフト
+                break;
+            case '?':
+                *ptr = *ptr % *(ptr - 1);
+                break;
+            case '>':
+                ptr++;
+                if (ptr >= memory + MEMORY_SIZE) ptr = memory; // メモリ範囲のラップ
+                break;
+            case '<':
+                ptr--;
+                if (ptr < memory) ptr = memory + MEMORY_SIZE - 1; // メモリ範囲のラップ
+                break;
+            case '#':
+                // 無条件ジャンプ処理（必要に応じて実装）
+                break;
+            case '[':
+                if (*ptr == 0) {
+                    // 対応する']'までスキップ
+                    int loop = 1;
+                    while (loop > 0) {
+                        chr = fgetc(file);
+                        if (chr == '[') loop++;
+                        else if (chr == ']') loop--;
+                    }
+                }
+                break;
+            case ']':
+                if (*ptr != 0) {
+                    // 対応する'['まで戻る
+                    int loop = 1;
+                    while (loop > 0) {
+                        fseek(file, -2, SEEK_CUR); // 1文字戻る
+                        chr = fgetc(file);
+                        if (chr == ']') loop++;
+                        else if (chr == '[') loop--;
+                    }
+                }
+                break;
+            case '^':
+                *ptr = *ptr & *(ptr - 1);
+                break;
+            case '%':
+                *ptr = *ptr | *(ptr - 1);
+                break;
+            case '!':
+                *ptr = ~(*ptr);
+                break;
+            case '=':
+                fclose(file);
+                return 0;
         }
-
     }
 
     fclose(file);
-
     return 0;
-
 }
