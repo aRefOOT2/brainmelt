@@ -1,7 +1,7 @@
 /*
 
-brainmelt interpriter
-Version 1.0.1
+brainmelt interpreter
+Version 1.0.2
 
 命令一覧：
 ```
@@ -41,7 +41,7 @@ void help()
     printf("brainmelt HELP\n");
     printf("usage:\n");
     printf("bi [input.bms]\n");
-    printf("\nbrainmelt interpriter version 1.0.1\n");
+    printf("\nbrainmelt interpreter version 1.0.2\n");
 
 }
 
