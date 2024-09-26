@@ -39,7 +39,8 @@ void help()
 {
 
     printf("brainmelt HELP\n");
-    printf("usage:    bi [input.bms]\n");
+    printf("usage:\n");
+    printf("bi [input.bms]\n");
     printf("\nbrainmelt interpriter version 1.0.1\n");
 
 }
