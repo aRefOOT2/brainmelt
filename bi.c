@@ -14,12 +14,12 @@ $:現在のアドレスに標準入力を1Byteずつ入力する
 ?:アドレスの値を一個前のアドレスの値で割ったあまりにする
 >:アドレス位置を1増やす
 <:アドレス位置を1減らす
-#:無条件ジャンプ
 [:0に等しかったら対応する`]`のあとまで移動
 ]:対応する`[`のあとまで移動
 ^:今のアドレスの値を一個前のアドレスの値とANDした結果にする
 %:今のアドレスの値を一個前のアドレスの値とORした結果にする
 !:今のアドレスの値をNOTする
+#:現在のアドレスからcall
 =:プログラムの終了を表す
 ```
 
@@ -101,10 +101,6 @@ int main(int argc, char* argv[])
                 ptr--;
                 if (ptr < memory) ptr = memory + MEMORY_SIZE - 1; // メモリ範囲のラップ
                 break;
-            case '#':
-                // 無条件ジャンプ処理
-                ptr = memory + *ptr;
-                break;
             case '[':
                 if (*ptr == 0)
                 {
@@ -148,6 +144,10 @@ int main(int argc, char* argv[])
                 break;
             case '!':
                 *ptr = ~(*ptr);
+                break;
+            case '#':
+//                ptr = memory + *ptr;
+                //どうやってcallを実現するか・・・
                 break;
             case '=':
                 fclose(file);
