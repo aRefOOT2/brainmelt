@@ -3,24 +3,24 @@
 brainmelt interpreter
 Version 1.0.3
 
-命令一覧：
+Command list:
 ```
-@:現在のアドレスの値を出力する
-$:現在のアドレスに標準入力を1Byteずつ入力する
-+:メモリアドレスの値を1増やす
--:メモリアドレスの値を1減らす
-*:アドレスの値を1回左にシフトする
-/:アドレスの値を1回右にシフトする
-?:アドレスの値を一個前のアドレスの値で割ったあまりにする
->:アドレス位置を1増やす
-<:アドレス位置を1減らす
-[:0に等しかったら対応する`]`のあとまで移動
-]:対応する`[`のあとまで移動
-^:今のアドレスの値を一個前のアドレスの値とANDした結果にする
-%:今のアドレスの値を一個前のアドレスの値とORした結果にする
-!:今のアドレスの値をNOTする
-#:現在のアドレスからcall
-=:プログラムの終了を表す
+@: Output the value of the current address
+$: Input standard input 1 byte at a time to the current address
++: Increase the value of the memory address by 1
+-: Decrease the value of the memory address by 1
+*: Shift the address value once to the left
+/: Shift the address value once to the right
+?: Divide the address value by the value of the previous address and get the remainder
+>: Increase the address position by 1
+<: Decrease the address position by 1
+[: If it is equal to 0, move to the end of the corresponding `]`
+]: Move to the end of the corresponding `[`
+^: Set the value of the current address to the result of ANDing the value of the previous address
+%: Set the value of the current address to the result of ORing the value of the previous address
+!: NOT the value of the current address
+#: Call from the current address
+=: Indicates the end of the program
 ```
 
 */
@@ -32,10 +32,9 @@ $:現在のアドレスに標準入力を1Byteずつ入力する
 #define MEMORY_SIZE 33554432
 
 int memory[MEMORY_SIZE] = {0};
-int *ptr = memory; // 現在のメモリポインタ
+int *ptr = memory;
 FILE *file;
 
-// 戻りアドレスのスタック管理
 #define MAX_CALL_STACK 8388608
 int *call_stack[MAX_CALL_STACK];
 int stack_pointer = 0;
@@ -90,27 +89,26 @@ int main(int argc, char* argv[])
                 (*ptr)--;
                 break;
             case '*':
-                *ptr <<= 1; // 左シフト
+                *ptr <<= 1;
                 break;
             case '/':
-                *ptr >>= 1; // 右シフト
+                *ptr >>= 1;
                 break;
             case '?':
                 *ptr = *ptr % *(ptr - 1);
                 break;
             case '>':
                 ptr++;
-                //if (ptr >= memory + MEMORY_SIZE) ptr = memory; // メモリ範囲のラップ
+                //if (ptr >= memory + MEMORY_SIZE) ptr = memory;
                 break;
             case '<':
                 ptr--;
-                //if (ptr < memory) ptr = memory + MEMORY_SIZE - 1; // メモリ範囲のラップ
+                //if (ptr < memory) ptr = memory + MEMORY_SIZE - 1;
                 break;
             case '[':
                 if (*ptr == 0)
                 {
             
-                    // 対応する']'までスキップ
                     int loop = 1;
                     while (loop > 0)
                     {
@@ -127,12 +125,11 @@ int main(int argc, char* argv[])
                 if (*ptr != 0)
                 {
                 
-                    // 対応する'['まで戻る
                     int loop = 1;
                     while (loop > 0)
                     {
                     
-                        fseek(file, -2, SEEK_CUR); // 1文字戻る
+                        fseek(file, -2, SEEK_CUR);
                         chr = fgetc(file);
                         if (chr == ']') loop++;
                         else if (chr == '[') loop--;
@@ -154,8 +151,8 @@ int main(int argc, char* argv[])
                 if (stack_pointer < MAX_CALL_STACK)
                 {
                 
-                    call_stack[stack_pointer++] = ptr; // 現在のポインタをスタックに保存
-                    ptr = memory + *ptr; // 新しいアドレスに移動
+                    call_stack[stack_pointer++] = ptr;
+                    ptr = memory + *ptr;
                 
                 } else
                 {
