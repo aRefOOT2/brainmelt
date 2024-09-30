@@ -1,7 +1,7 @@
 /*
 
 brainmelt interpreter
-Version 1.0.2
+Version 1.0.3
 
 命令一覧：
 ```
@@ -29,19 +29,24 @@ $:現在のアドレスに標準入力を1Byteずつ入力する
 #include <stdlib.h>
 #include <string.h>
 
-#define MEMORY_SIZE 30000
+#define MEMORY_SIZE 33554432
 
 int memory[MEMORY_SIZE] = {0};
 int *ptr = memory; // 現在のメモリポインタ
 FILE *file;
+
+// 戻りアドレスのスタック管理
+#define MAX_CALL_STACK 8388608
+int *call_stack[MAX_CALL_STACK];
+int stack_pointer = 0;
 
 void help() 
 {
 
     printf("brainmelt HELP\n");
     printf("usage:\n");
-    printf("bi [input.bms]\n");
-    printf("\nbrainmelt interpreter version 1.0.2\n");
+    printf("    bi [input.bms]\n");
+    printf("\nbrainmelt interpreter version 1.0.3\n");
 
 }
 
@@ -60,7 +65,7 @@ int main(int argc, char* argv[])
     if (!file)
     {
     
-        printf("failed open file.\n");
+        printf("failed to open file.\n");
         return 1;
     
     }
@@ -95,16 +100,16 @@ int main(int argc, char* argv[])
                 break;
             case '>':
                 ptr++;
-                if (ptr >= memory + MEMORY_SIZE) ptr = memory; // メモリ範囲のラップ
+                //if (ptr >= memory + MEMORY_SIZE) ptr = memory; // メモリ範囲のラップ
                 break;
             case '<':
                 ptr--;
-                if (ptr < memory) ptr = memory + MEMORY_SIZE - 1; // メモリ範囲のラップ
+                //if (ptr < memory) ptr = memory + MEMORY_SIZE - 1; // メモリ範囲のラップ
                 break;
             case '[':
                 if (*ptr == 0)
                 {
-                
+            
                     // 対応する']'までスキップ
                     int loop = 1;
                     while (loop > 0)
@@ -146,15 +151,25 @@ int main(int argc, char* argv[])
                 *ptr = ~(*ptr);
                 break;
             case '#':
-//                ptr = memory + *ptr;
-                //どうやってcallを実現するか・・・
+                if (stack_pointer < MAX_CALL_STACK)
+                {
+                
+                    call_stack[stack_pointer++] = ptr; // 現在のポインタをスタックに保存
+                    ptr = memory + *ptr; // 新しいアドレスに移動
+                
+                } else
+                {
+                
+                    printf("Call stack overflow\n");
+                
+                }
                 break;
             case '=':
                 fclose(file);
                 return 0;
         
         }
-
+    
     }
 
 }
